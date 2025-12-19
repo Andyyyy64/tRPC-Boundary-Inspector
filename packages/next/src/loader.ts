@@ -7,8 +7,8 @@ import trpcBoundaryInspectorBabelPlugin from '../../babel/src/index.js';
 const require = createRequire(import.meta.url);
 const babelPluginSyntaxTypescript = require.resolve('@babel/plugin-syntax-typescript');
 
-// デバッグ用ログ
-const DEBUG = true;
+// デバッグ用ログ（本番では false）
+const DEBUG = false;
 const log = (msg: string) => DEBUG && console.log(`[trpc-boundary-loader] ${msg}`);
 
 /**
