@@ -1,15 +1,15 @@
 # tRPC Boundary Inspector
 
-> tRPC calls look like functions. This shows the network.
+Visualize where your tRPC calls cross the network boundary.
 
-`tRPC Boundary Inspector` は、tRPC の呼び出しがネットワーク境界を跨いでいる箇所を可視化する CLI ツールです。
-特に Next.js App Router において、どこで通信が発生しているかを一目で把握できるようにします。
+`tRPC Boundary Inspector` is a CLI tool that makes tRPC network boundaries visible, especially in Next.js App Router environments. It helps you identify where communication occurs at a glance.
 
 ## Features
 
-- **Network Boundary Mapping**: tRPC 呼び出しが Client / Server (RSC) / Edge のどこで行われているかを特定。
-- **Call Density Analysis**: どのファイルが通信の温床になっているかをヒートマップ（ランキング）形式で表示。
-- **PR Friendly**: Markdown 形式でのレポート出力に対応し、CI での利用が可能。
+- **Network Boundary Mapping**: Identify whether tRPC calls are made from the Client, Server (RSC), or Edge Runtime.
+- **Call Density Analysis**: See which files are communication hotspots.
+- **Detailed Inspection**: Pinpoint exact line numbers, procedure paths, and call types (query, mutation, etc.).
+- **CI Friendly**: Generate Markdown reports to track boundary crossings in your Pull Requests.
 
 ## Installation
 
@@ -20,25 +20,47 @@ npm install -g trpc-boundary-inspector
 ## Usage
 
 ```bash
-# プロジェクトのスキャン
-trpc-boundary-inspector scan ./src
+# Basic scan
+trpc-boundary-inspector .
 
-# レポートを Markdown として出力
-trpc-boundary-inspector scan ./src --output trpc-report.md
+# Show all hotspots with detailed call locations
+trpc-boundary-inspector . --all --details
+
+# Collapse duplicate calls in the same file
+trpc-boundary-inspector . --details --collapse
+
+# Ignore specific directories
+trpc-boundary-inspector . -I node_modules .next
+```
+
+## Output Example
+
+```text
+tRPC Network Boundary Inspection
+────────────────────────────────
+Total network boundary crossings: 240
+Crossings from Browser (Client): 172
+Crossings from Server (RSC):  68
+
+Top hotspots:
+- ./app/(admin)/admin/user/analysis/page.tsx (15)
+  [query] trpc.admin.user.analysis.useQuery
+  [query] trpc.admin.user.detail.useQuery
+- ./app/(user)/settings/hooks/useProfileSettings.ts (8)
+  [query] trpc.user.getProfile.useQuery (x2)
+  [mutation] trpc.user.updateProfile.useMutation
 ```
 
 ## Why?
 
-tRPC は非常に強力で、サーバーの関数をクライアントで直接呼んでいるかのような書き味を提供します。
-しかし、その「ただの関数呼び出し」に見える性質ゆえに、以下のような問題が無意識に発生しがちです：
+tRPC is powerful because it makes server functions feel like local ones. However, this abstraction can lead to:
 
-1. **意図しない Waterfall**: レンダー中に複数の `useQuery` を呼んでしまい、直列に通信が発生する。
-2. **境界の不透明さ**: 「このコードはサーバーで動いているのか、クライアントで動いているのか」が曖昧になり、不要な通信を増やしてしまう。
-3. **ランタイム事故**: Edge Runtime で Node.js 専用 API を含む Procedure を呼んでしまう。
+1.  **Unintended Waterfalls**: Calling multiple `useQuery` hooks during render, causing sequential network requests.
+2.  **Boundary Confusion**: Losing track of whether code runs on the server or client, leading to unnecessary communication.
+3.  **Runtime Errors**: Accidental calls to Node.js-only procedures from the Edge Runtime.
 
-このツールは、これらの「事故の手前の構造」を可視化し、より健全な設計をサポートします。
+This tool visualizes the "structure before the accident," supporting healthier architectural decisions.
 
 ## License
 
 ISC
-
