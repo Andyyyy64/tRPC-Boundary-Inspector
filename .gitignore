@@ -3,4 +3,4 @@ dist
 dummy-app
 dummy-report.md
 *.log
-
+.next

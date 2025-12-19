@@ -4,10 +4,25 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "trpc-boundary-inspector": ["./packages/runtime/src/index.ts"],
+      "trpc-boundary-inspector/next": ["./packages/next/src/index.ts"]
+    }
   },
-  "include": ["src/**/*"]
+  "include": [
+    "packages/cli/src/**/*.ts",
+    "packages/runtime/src/**/*.ts",
+    "packages/next/src/**/*.ts",
+    "packages/babel/src/**/*.ts"
+  ],
+  "exclude": ["example/**/*", "node_modules"]
 }
