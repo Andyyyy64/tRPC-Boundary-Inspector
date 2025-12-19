@@ -35,21 +35,7 @@ trpc-boundary-inspector . -I node_modules .next
 
 ## Output Example
 
-```text
-tRPC Network Boundary Inspection
-────────────────────────────────
-Total network boundary crossings: 240
-Crossings from Browser (Client): 172
-Crossings from Server (RSC):  68
-
-Top hotspots:
-- ./app/(admin)/admin/user/analysis/page.tsx (15)
-  [query] trpc.admin.user.analysis.useQuery
-  [query] trpc.admin.user.detail.useQuery
-- ./app/(user)/settings/hooks/useProfileSettings.ts (8)
-  [query] trpc.user.getProfile.useQuery (x2)
-  [mutation] trpc.user.updateProfile.useMutation
-```
+![output](./example/output_example.png)
 
 ## Why?
 
