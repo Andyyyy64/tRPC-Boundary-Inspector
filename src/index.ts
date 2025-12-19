@@ -10,36 +10,30 @@ import chalk from 'chalk';
 const program = new Command();
 
 program
-  .name('trpc-boundary-inspector')
-  .description('Make tRPC network boundaries visible.')
-  .version('1.0.0');
+    .name('trpc-boundary-inspector')
+    .description('Make tRPC network boundaries visible.')
+    .version('0.0.1')
+    .argument('[path]', 'path to scan', '.')
+    .option('-o, --output <file>', 'output file (e.g., report.md)')
+    .action(async (targetPath, options) => {
+        try {
+            const absolutePath = path.resolve(process.cwd(), targetPath);
 
-program
-  .command('scan')
-  .description('Scan the project for tRPC boundary calls')
-  .argument('[path]', 'path to scan', '.')
-  .option('-o, --output <file>', 'output file (e.g., report.md)')
-  .action(async (targetPath, options) => {
-    try {
-      const absolutePath = path.resolve(process.cwd(), targetPath);
-      
-      console.log(chalk.blue(`Scanning for tRPC boundaries in ${absolutePath}...`));
-      
-      const result = await analyzeProject(absolutePath);
-      
-      printConsoleSummary(result);
+            const result = await analyzeProject(absolutePath);
 
-      if (options.output) {
-        const report = generateMarkdownReport(result);
-        fs.writeFileSync(options.output, report);
-        console.log(chalk.green(`Report saved to ${options.output}`));
-      }
+            printConsoleSummary(result);
 
-    } catch (error) {
-      console.error(chalk.red('Error during scan:'), error);
-      process.exit(1);
-    }
-  });
+            if (options.output) {
+                const report = generateMarkdownReport(result);
+                fs.writeFileSync(options.output, report);
+                console.log(chalk.green(`Report saved to ${options.output}`));
+            }
+
+        } catch (error) {
+            console.error(chalk.red('Error during scan:'), error);
+            process.exit(1);
+        }
+    });
 
 program.parse();
 

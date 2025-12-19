@@ -56,17 +56,44 @@ export function generateMarkdownReport(result: AnalysisResult): string {
  */
 export function printConsoleSummary(result: AnalysisResult): void {
     const { calls } = result;
-    console.log(chalk.bold(`\ntRPC Boundary Inspection Complete!`));
-    console.log(`Found ${chalk.cyan(calls.length)} potential network boundary crossings.\n`);
+
+    console.log('\n' + chalk.bold('tRPC Boundary Summary'));
+    console.log(chalk.gray('────────────────────'));
+
+    console.log(`${chalk.white('Total boundary calls:')} ${chalk.cyan(calls.length)}`);
 
     const summary = calls.reduce((acc, call) => {
         acc[call.boundary] = (acc[call.boundary] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
-    Object.entries(summary).forEach(([boundary, count]) => {
-        console.log(`- ${boundary}: ${chalk.yellow(count)} calls`);
+    const labels: Record<string, string> = {
+        'Client': 'Client Components:  ',
+        'Server (RSC)': 'Server Components:  ',
+        'Edge': 'Edge Components:    ',
+    };
+
+    Object.entries(labels).forEach(([key, label]) => {
+        if (summary[key]) {
+            console.log(`${chalk.white(label)} ${chalk.yellow(summary[key])}`);
+        }
     });
+
+    console.log('\n' + chalk.bold('Top hotspots:'));
+
+    const fileRanking = calls.reduce((acc, call) => {
+        acc[call.file] = (acc[call.file] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const sortedFiles = Object.entries(fileRanking)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    sortedFiles.forEach(([file, count]) => {
+        console.log(`- ${chalk.blue(file)} ${chalk.gray(`(${count})`)}`);
+    });
+
     console.log('');
 }
 
