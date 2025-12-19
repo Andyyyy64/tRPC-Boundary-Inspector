@@ -52,48 +52,67 @@ export function generateMarkdownReport(result: AnalysisResult): string {
 }
 
 /**
+ * 境界ごとの色定義
+ */
+const BOUNDARY_COLORS: Record<string, (s: string | number) => string> = {
+  'Client': chalk.cyan,
+  'Server (RSC)': chalk.green,
+  'Edge': chalk.magenta,
+};
+
+/**
  * コンソールへのサマリー出力
  */
-export function printConsoleSummary(result: AnalysisResult): void {
-    const { calls } = result;
+export function printConsoleSummary(result: AnalysisResult, options: { showAll?: boolean } = {}): void {
+  const { calls } = result;
+  
+  console.log('\n' + chalk.bold('tRPC Boundary Summary'));
+  console.log(chalk.gray('────────────────────'));
+  
+  console.log(`${chalk.white('Total boundary calls:')} ${chalk.bold.white(calls.length)}`);
+  
+  const summary = calls.reduce((acc, call) => {
+    acc[call.boundary] = (acc[call.boundary] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-    console.log('\n' + chalk.bold('tRPC Boundary Summary'));
-    console.log(chalk.gray('────────────────────'));
+  const labels: Record<string, string> = {
+    'Client': 'Client Components:  ',
+    'Server (RSC)': 'Server Components:  ',
+    'Edge': 'Edge Components:    ',
+  };
 
-    console.log(`${chalk.white('Total boundary calls:')} ${chalk.cyan(calls.length)}`);
+  Object.entries(labels).forEach(([key, label]) => {
+    if (summary[key]) {
+      const color = BOUNDARY_COLORS[key] || chalk.white;
+      console.log(`${color(label)} ${chalk.bold(summary[key])}`);
+    }
+  });
 
-    const summary = calls.reduce((acc, call) => {
-        acc[call.boundary] = (acc[call.boundary] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
+  const title = options.showAll ? 'All hotspots:' : 'Top hotspots:';
+  console.log('\n' + chalk.bold(title));
+  
+  // ファイルごとの集計と境界情報の保持
+  const fileInfo = calls.reduce((acc, call) => {
+    if (!acc[call.file]) {
+      acc[call.file] = { count: 0, boundary: call.boundary };
+    }
+    acc[call.file].count++;
+    return acc;
+  }, {} as Record<string, { count: number; boundary: string }>);
 
-    const labels: Record<string, string> = {
-        'Client': 'Client Components:  ',
-        'Server (RSC)': 'Server Components:  ',
-        'Edge': 'Edge Components:    ',
-    };
+  let sortedFiles = Object.entries(fileInfo)
+    .sort((a, b) => b[1].count - a[1].count);
 
-    Object.entries(labels).forEach(([key, label]) => {
-        if (summary[key]) {
-            console.log(`${chalk.white(label)} ${chalk.yellow(summary[key])}`);
-        }
-    });
+  if (!options.showAll) {
+    sortedFiles = sortedFiles.slice(0, 5);
+  }
 
-    console.log('\n' + chalk.bold('Top hotspots:'));
-
-    const fileRanking = calls.reduce((acc, call) => {
-        acc[call.file] = (acc[call.file] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const sortedFiles = Object.entries(fileRanking)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    sortedFiles.forEach(([file, count]) => {
-        console.log(`- ${chalk.blue(file)} ${chalk.gray(`(${count})`)}`);
-    });
-
-    console.log('');
+  sortedFiles.forEach(([file, info]) => {
+    const color = BOUNDARY_COLORS[info.boundary] || chalk.blue;
+    console.log(`- ${color(file)} ${chalk.gray(`(${info.count})`)}`);
+  });
+  
+  console.log('');
 }
 

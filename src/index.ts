@@ -15,13 +15,14 @@ program
     .version('0.0.1')
     .argument('[path]', 'path to scan', '.')
     .option('-o, --output <file>', 'output file (e.g., report.md)')
+    .option('--all', 'show all hotspots instead of top 5')
     .action(async (targetPath, options) => {
         try {
             const absolutePath = path.resolve(process.cwd(), targetPath);
 
             const result = await analyzeProject(absolutePath);
 
-            printConsoleSummary(result);
+            printConsoleSummary(result, { showAll: options.all });
 
             if (options.output) {
                 const report = generateMarkdownReport(result);
