@@ -14,21 +14,32 @@ export interface AnalysisResult {
     fileCount: number;
 }
 
+export interface AnalysisOptions {
+    targetPath: string;
+    ignore?: string[];
+}
+
 /**
  * プロジェクト内の tRPC 呼び出しを抽出する
  */
-export async function analyzeProject(targetPath: string): Promise<AnalysisResult> {
+export async function analyzeProject(options: AnalysisOptions): Promise<AnalysisResult> {
+    const { targetPath, ignore = [] } = options;
     const project = new Project({
         compilerOptions: {
             allowJs: true,
         },
     });
 
+    const ignorePatterns = ignore.map(p => `!${targetPath}/**/${p}/**`).concat(
+        ignore.map(p => `!${targetPath}/**/${p}`)
+    );
+
     // 対象ファイルを読み込み
     project.addSourceFilesAtPaths([
         `${targetPath}/**/*.ts`,
         `${targetPath}/**/*.tsx`,
         `!${targetPath}/**/node_modules/**`,
+        ...ignorePatterns,
     ]);
 
     const sourceFiles = project.getSourceFiles();

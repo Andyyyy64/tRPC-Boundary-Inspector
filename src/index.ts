@@ -16,11 +16,15 @@ program
     .argument('[path]', 'path to scan', '.')
     .option('-o, --output <file>', 'output file (e.g., report.md)')
     .option('--all', 'show all hotspots instead of top 5')
+    .option('-I, --ignore <patterns...>', 'ignore directories or files')
     .action(async (targetPath, options) => {
         try {
             const absolutePath = path.resolve(process.cwd(), targetPath);
 
-            const result = await analyzeProject(absolutePath);
+            const result = await analyzeProject({
+                targetPath: absolutePath,
+                ignore: options.ignore,
+            });
 
             printConsoleSummary(result, { showAll: options.all });
 
