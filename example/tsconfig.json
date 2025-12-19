@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "trpc-boundary-inspector": ["../../dist/runtime/index.js"],
+      "trpc-boundary-inspector/next": ["../../dist/next/index.js"]
+    },
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"]
+}
