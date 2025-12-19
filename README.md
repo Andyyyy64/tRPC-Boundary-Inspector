@@ -60,7 +60,3 @@ tRPC is powerful because it makes server functions feel like local ones. However
 3.  **Runtime Errors**: Accidental calls to Node.js-only procedures from the Edge Runtime.
 
 This tool visualizes the "structure before the accident," supporting healthier architectural decisions.
-
-## License
-
-ISC
