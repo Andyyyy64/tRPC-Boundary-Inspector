@@ -21,14 +21,23 @@ export interface AnalysisOptions {
 }
 
 /**
- * メソッド名から通信タイプを判定
+ * メソッド名または境界情報から通信タイプを判定
  */
-function getCallType(method: string): TRPCCall['type'] {
+function getCallType(method: string, boundary: string): TRPCCall['type'] {
   const m = method.toLowerCase();
   if (m.includes('query')) return 'query';
   if (m.includes('mutation') || m === 'mutate') return 'mutation';
   if (m.includes('subscription')) return 'subscription';
   if (m.includes('utils') || m.startsWith('usecontext')) return 'utils';
+
+  // Server (RSC) で直接 await している場合は基本 query として扱う
+  if (boundary === 'Server (RSC)' || boundary === 'Edge') {
+    // 慣習的に get/list/find などから始まる、あるいは mutate/delete/update を含まないものは query
+    const mutationKeywords = ['update', 'delete', 'create', 'remove', 'set', 'add', 'upsert'];
+    if (mutationKeywords.some((k) => m.includes(k))) return 'mutation';
+    return 'query';
+  }
+
   return 'unknown';
 }
 
@@ -80,7 +89,7 @@ export async function analyzeProject(options: AnalysisOptions): Promise<Analysis
           calls.push({
             procedurePath: finalPath,
             method,
-            type: getCallType(method),
+            type: getCallType(method, boundary),
             file: filePath.replace(process.cwd(), '.'),
             line: call.getStartLineNumber(),
             boundary,
