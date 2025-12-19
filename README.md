@@ -83,39 +83,15 @@ tRPC [node][server] [query] user.getAccount
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Build Time (Webpack)                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. Custom loader detects tRPC calls by terminal method names        │
-│     (.useQuery, .useMutation, .query, .mutation, etc.)               │
-│                                                                      │
-│  2. Babel plugin transforms AST to inject __boundary metadata        │
-│                                                                      │
-│     api.user.getAccount.query()                                      │
-│     ↓                                                                │
-│     api.user.getAccount.query(undefined, {                           │
-│       trpc: { context: { __boundary: {                               │
-│         file: './app/providers/session.tsx',                         │
-│         line: 57,                                                    │
-│         side: 'server'                                               │
-│       }}}                                                            │
-│     })                                                               │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-                                    ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                           Runtime                                    │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  3. boundaryLink extracts metadata and adds to URL query             │
-│     → ?__b=./app/providers/session.tsx:57:server                     │
-│                                                                      │
-│  4. boundaryLogger parses URL and outputs formatted log              │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+**Build Time (Webpack)**
+
+1. Custom loader detects tRPC calls by terminal method names (`.useQuery`, `.useMutation`, `.query`, `.mutation`, etc.)
+2. Babel plugin transforms AST to inject `__boundary` metadata into tRPC call options
+
+**Runtime**
+
+3. `boundaryLink` extracts metadata and adds to URL query (`?__b=./file.tsx:57:server`)
+4. `boundaryLogger` parses URL and outputs formatted log
 
 ### Detected tRPC Methods
 
