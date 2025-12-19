@@ -1,4 +1,4 @@
-import { AnalysisResult } from './analyzer.js';
+import { AnalysisResult, TRPCCall } from './analyzer.js';
 import chalk from 'chalk';
 
 /**
@@ -55,64 +55,74 @@ export function generateMarkdownReport(result: AnalysisResult): string {
  * 境界ごとの色定義
  */
 const BOUNDARY_COLORS: Record<string, (s: string | number) => string> = {
-  'Client': chalk.cyan,
-  'Server (RSC)': chalk.green,
-  'Edge': chalk.magenta,
+    'Client': chalk.cyan,
+    'Server (RSC)': chalk.green,
+    'Edge': chalk.magenta,
 };
 
 /**
  * コンソールへのサマリー出力
  */
-export function printConsoleSummary(result: AnalysisResult, options: { showAll?: boolean } = {}): void {
-  const { calls } = result;
-  
-  console.log('\n' + chalk.bold('tRPC Boundary Summary'));
-  console.log(chalk.gray('────────────────────'));
-  
-  console.log(`${chalk.white('Total boundary calls:')} ${chalk.bold.white(calls.length)}`);
-  
-  const summary = calls.reduce((acc, call) => {
-    acc[call.boundary] = (acc[call.boundary] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+export function printConsoleSummary(result: AnalysisResult, options: { showAll?: boolean, details?: boolean } = {}): void {
+    const { calls } = result;
 
-  const labels: Record<string, string> = {
-    'Client': 'Client Components:  ',
-    'Server (RSC)': 'Server Components:  ',
-    'Edge': 'Edge Components:    ',
-  };
+    console.log('\n' + chalk.bold('tRPC Network Boundary Inspection'));
+    console.log(chalk.gray('────────────────────────────────'));
 
-  Object.entries(labels).forEach(([key, label]) => {
-    if (summary[key]) {
-      const color = BOUNDARY_COLORS[key] || chalk.white;
-      console.log(`${color(label)} ${chalk.bold(summary[key])}`);
+    console.log(`${chalk.white('Total network boundary crossings:')} ${chalk.bold.white(calls.length)}`);
+
+    const summary = calls.reduce((acc, call) => {
+        acc[call.boundary] = (acc[call.boundary] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const labels: Record<string, string> = {
+        'Client': 'Crossings from Browser (Client): ',
+        'Server (RSC)': 'Crossings from Server (RSC):  ',
+        'Edge': 'Crossings from Edge Runtime:  ',
+    };
+
+    Object.entries(labels).forEach(([key, label]) => {
+        if (summary[key]) {
+            const color = BOUNDARY_COLORS[key] || chalk.white;
+            console.log(`${color(label)} ${chalk.bold(summary[key])}`);
+        }
+    });
+
+    const title = options.showAll ? 'All hotspots:' : 'Top hotspots:';
+    console.log('\n' + chalk.bold(title));
+
+    // ファイルごとの詳細をグループ化
+    const fileGroups = calls.reduce((acc, call) => {
+        if (!acc[call.file]) {
+            acc[call.file] = { count: 0, boundary: call.boundary, items: [] };
+        }
+        acc[call.file].count++;
+        acc[call.file].items.push(call);
+        return acc;
+    }, {} as Record<string, { count: number; boundary: string, items: TRPCCall[] }>);
+
+    let sortedFiles = Object.entries(fileGroups)
+        .sort((a, b) => b[1].count - a[1].count);
+
+    if (!options.showAll && !options.details) {
+        sortedFiles = sortedFiles.slice(0, 5);
     }
-  });
 
-  const title = options.showAll ? 'All hotspots:' : 'Top hotspots:';
-  console.log('\n' + chalk.bold(title));
-  
-  // ファイルごとの集計と境界情報の保持
-  const fileInfo = calls.reduce((acc, call) => {
-    if (!acc[call.file]) {
-      acc[call.file] = { count: 0, boundary: call.boundary };
-    }
-    acc[call.file].count++;
-    return acc;
-  }, {} as Record<string, { count: number; boundary: string }>);
+    sortedFiles.forEach(([file, info]) => {
+        const color = BOUNDARY_COLORS[info.boundary] || chalk.blue;
+        console.log(`- ${color(file)} ${chalk.gray(`(${info.count})`)}`);
 
-  let sortedFiles = Object.entries(fileInfo)
-    .sort((a, b) => b[1].count - a[1].count);
+        // --details が指定されている場合、各ファイルの呼び出し詳細を表示
+        if (options.details) {
+            info.items.sort((a, b) => a.line - b.line).forEach(item => {
+                const lineStr = `L${item.line}`.padEnd(5);
+                const methodColor = item.method.startsWith('use') ? chalk.cyan : chalk.green;
+                console.log(`  ${chalk.gray(lineStr)} ${chalk.white(`trpc.${item.procedurePath}.`)}${methodColor(item.method)}`);
+            });
+        }
+    });
 
-  if (!options.showAll) {
-    sortedFiles = sortedFiles.slice(0, 5);
-  }
-
-  sortedFiles.forEach(([file, info]) => {
-    const color = BOUNDARY_COLORS[info.boundary] || chalk.blue;
-    console.log(`- ${color(file)} ${chalk.gray(`(${info.count})`)}`);
-  });
-  
-  console.log('');
+    console.log('');
 }
 

@@ -16,6 +16,7 @@ program
     .argument('[path]', 'path to scan', '.')
     .option('-o, --output <file>', 'output file (e.g., report.md)')
     .option('--all', 'show all hotspots instead of top 5')
+    .option('--details', 'show detailed call locations for each file')
     .option('-I, --ignore <patterns...>', 'ignore directories or files')
     .action(async (targetPath, options) => {
         try {
@@ -26,7 +27,10 @@ program
                 ignore: options.ignore,
             });
 
-            printConsoleSummary(result, { showAll: options.all });
+            printConsoleSummary(result, {
+                showAll: options.all,
+                details: options.details
+            });
 
             if (options.output) {
                 const report = generateMarkdownReport(result);
