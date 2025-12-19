@@ -1,0 +1,6 @@
+node_modules
+dist
+dummy-app
+dummy-report.md
+*.log
+
