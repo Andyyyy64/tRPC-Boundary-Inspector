@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -22,7 +23,7 @@
     "react-dom": "^19.2.3",
     "server-only": "^0.0.1",
     "superjson": "^2.2.6",
-    "trpc-boundary-inspector": "file:../..",
+    "trpc-boundary-inspector": "file:..",
     "zod": "^4.2.1"
   }
 }

@@ -1,2 +1,4 @@
 node_modules
 .next
+# SWC plugin（テスト用にコピー）
+*.wasm
