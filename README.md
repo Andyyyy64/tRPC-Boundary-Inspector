@@ -4,6 +4,8 @@ Visualize where your tRPC calls cross the network boundary.
 
 `tRPC Boundary Inspector` is a tool that makes tRPC network boundaries visible, especially in Next.js App Router environments. It helps you identify where communication occurs at a glance.
 
+> **⚠️ Note: It is strongly recommended to use this tool ONLY in Development environments.** (See [Potential Risks](#️-important-notes--potential-risks) below for details)
+
 ## Features
 
 - **Network Boundary Mapping**: Identify whether tRPC calls are made from the Client, Server (RSC), or Edge Runtime.
