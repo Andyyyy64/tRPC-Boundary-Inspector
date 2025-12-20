@@ -8,8 +8,8 @@ Visualize where your tRPC calls cross the network boundary.
 
 - **Network Boundary Mapping**: Identify whether tRPC calls are made from the Client, Server (RSC), or Edge Runtime.
 - **Automatic Call-Site Tracking**: File name and line number are automatically injected at build time.
+- **Next.js 15+ & Turbopack Ready**: Powered by a high-performance SWC (Wasm) plugin.
 - **Zero Code Changes**: Just wrap your Next.js config - no changes to your tRPC calls needed.
-- **Call Density Analysis**: See which files are communication hotspots.
 - **CI Friendly**: Generate Markdown reports to track boundary crossings in your Pull Requests.
 
 ## Installation
@@ -18,16 +18,24 @@ Visualize where your tRPC calls cross the network boundary.
 npm install trpc-boundary-inspector
 ```
 
-## Quick Start (3 Steps)
+## Quick Start (Next.js 15+ / Turbopack / SWC)
+
+The recommended setup for modern Next.js projects using SWC and Turbopack.
 
 ### Step 1: Wrap Next.js Config
 
+Enable `useSWCPlugin` in your `next.config.js`.
+
 ```javascript
 // next.config.js
-const { withTRPCBoundaryInspector } = require("trpc-boundary-inspector/next");
+import { withTRPCBoundaryInspector } from "trpc-boundary-inspector/next";
 
-module.exports = withTRPCBoundaryInspector({
+const nextConfig = {
   // your existing next config
+};
+
+export default withTRPCBoundaryInspector(nextConfig, {
+  useSWCPlugin: true // Use SWC (Wasm) plugin
 });
 ```
 
@@ -42,13 +50,7 @@ export const trpc = createTRPCReact<AppRouter>({
     boundaryLink(),
     httpBatchLink({
       url: "/api/trpc",
-      headers(opts) {
-        const boundaryHeaders = (opts.opList[0]?.context as any)?.headers || {};
-        return {
-          "x-trpc-source": "nextjs-react",
-          ...boundaryHeaders,
-        };
-      },
+      // ...
     }),
   ],
 });
@@ -62,15 +64,27 @@ import { boundaryLogger } from "trpc-boundary-inspector/runtime";
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
-    endpoint: "/api/trpc",
-    req,
-    router: appRouter,
+    // ...
     createContext: () => {
       boundaryLogger(req.headers, { url: req.url, method: req.method });
       return createTRPCContext({ headers: req.headers });
     },
   });
 ```
+
+## Legacy / Custom Babel Support (Webpack only)
+
+If your project uses `.babelrc` or `babel.config.js` and relies on Babel instead of SWC, use the following configuration.
+
+```javascript
+// next.config.js
+import { withTRPCBoundaryInspector } from "trpc-boundary-inspector/next";
+
+export default withTRPCBoundaryInspector({
+  // options default to { useSWCPlugin: false }
+});
+```
+*Note: Turbopack is not supported in this mode.*
 
 ## Output Example
 
@@ -83,33 +97,16 @@ tRPC [node][server] [query] user.getAccount
 
 ## How It Works
 
-**Build Time (Webpack)**
-
-1. Custom loader detects tRPC calls by terminal method names (`.useQuery`, `.useMutation`, `.query`, `.mutation`, etc.)
-2. Babel plugin transforms AST to inject `__boundary` metadata into tRPC call options
-
-**Runtime**
-
-3. `boundaryLink` extracts metadata and adds to URL query (`?__b=./file.tsx:57:server`)
-4. `boundaryLogger` parses URL and outputs formatted log
-
-### Detected tRPC Methods
-
-The following terminal method names are automatically detected:
-
-- **React Query Hooks**: `useQuery`, `useMutation`, `useSuspenseQuery`, `useInfiniteQuery`, `useSuspenseInfiniteQuery`
-- **Vanilla Client**: `query`, `mutation`
-- **Server-side**: `prefetch`, `fetchQuery`, `fetchInfiniteQuery`, `prefetchQuery`, `prefetchInfiniteQuery`, `ensureQueryData`
-
-## ⚠️ Turbopack Limitation
-
-**This tool currently works with Webpack only.**
-
-Turbopack (Next.js 15+ default) does not fully support custom Webpack loaders. 
+1. **Build Time (SWC/Babel)**: 
+   - **SWC Plugin (Wasm)**: A high-performance plugin written in Rust detects tRPC calls like `useQuery` or `useMutation` and injects metadata (file name and line number) into the `context`.
+   - **Babel Plugin**: For Webpack environments, a Babel plugin performs the same transformation.
+2. **Runtime**:
+   - `boundaryLink` extracts the injected metadata and attaches it to HTTP headers or URL queries.
+   - `boundaryLogger` receives it on the server side and outputs beautifully formatted logs.
 
 ## CLI (Static Analysis)
 
-Scan your entire project to identify communication hotspots:
+Scan your entire project to identify communication hotspots.
 
 ```bash
 # Install globally
@@ -117,23 +114,8 @@ npm install -g trpc-boundary-inspector
 
 # Basic scan
 trpc-boundary-inspector .
-
-# Show all hotspots with detailed call locations
-trpc-boundary-inspector . --all --details
-
-# Collapse duplicate calls in the same file
-trpc-boundary-inspector . --details --collapse
-
-# Ignore specific directories
-trpc-boundary-inspector . -I node_modules .next
 ```
 
 ## Why?
 
-tRPC is powerful because it makes server functions feel like local ones. However, this abstraction can lead to:
-
-1. **Unintended Waterfalls**: Calling multiple `useQuery` hooks during render, causing sequential network requests.
-2. **Boundary Confusion**: Losing track of whether code runs on the server or client, leading to unnecessary communication.
-3. **Runtime Errors**: Accidental calls to Node.js-only procedures from the Edge Runtime.
-
-This tool visualizes the "structure before the accident," supporting healthier architectural decisions.
+tRPC is powerful, but its abstraction can make it easy to lose track of where network communication is actually happening. This tool visualizes the "structure before the accident," supporting healthier architectural decisions.
