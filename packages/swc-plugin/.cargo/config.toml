@@ -1,0 +1,7 @@
+# Wasm ビルド用のターゲット設定
+[build]
+target = "wasm32-wasip1"
+
+[target.wasm32-wasip1]
+# wasm-opt による最適化（オプション）
+# rustflags = ["-C", "target-feature=+atomics,+bulk-memory,+mutable-globals"]

@@ -38,6 +38,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:swc-plugin": "cd packages/swc-plugin && cargo build --release",
     "dev": "node --loader ts-node/esm packages/cli/src/index.ts",
     "check": "oxlint && tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

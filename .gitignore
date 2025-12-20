@@ -4,3 +4,10 @@ dummy-app
 dummy-report.md
 *.log
 .next
+.turbo
+.env
+.DS_Store
+
+# rust 
+target
+Cargo.lock

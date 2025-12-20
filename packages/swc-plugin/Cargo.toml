@@ -1,0 +1,23 @@
+[package]
+name = "trpc-boundary-inspector-swc-plugin"
+version = "0.0.1"
+edition = "2021"
+description = "SWC plugin to inject boundary metadata into tRPC calls"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+opt-level = "s"
+
+[dependencies]
+# SWC core（最新バージョン）
+swc_core = { version = "52", features = [
+    "ecma_plugin_transform",
+    "ecma_visit",
+    "ecma_ast",
+    "ecma_utils",
+] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
