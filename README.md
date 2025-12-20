@@ -95,12 +95,18 @@ tRPC [node][server] [query] user.getAccount
 
 ## How It Works
 
-1. **Build Time (SWC/Babel)**: 
-   - **SWC Plugin (Wasm)**: A high-performance plugin written in Rust detects tRPC calls like `useQuery` or `useMutation` and injects metadata (file name and line number) into the `context`.
-   - **Babel Plugin**: For Webpack environments, a Babel plugin performs the same transformation.
-2. **Runtime**:
-   - `boundaryLink` extracts the injected metadata and attaches it to HTTP headers or URL queries.
-   - `boundaryLogger` receives it on the server side and outputs beautifully formatted logs.
+### 1. Build-Time: Metadata Injection (SWC / Babel)
+During the compilation phase, the tool automatically transforms your tRPC calls to inject call-site metadata.
+
+*   **SWC Plugin (Recommended)**: A high-performance Rust-based plugin that integrates directly into the SWC pipeline (the Next.js default). It analyzes the Abstract Syntax Tree (AST) to find tRPC methods like `useQuery`, `useMutation`, or `query`, and injects the file name and line number into the tRPC `context` object.
+*   **Transformation**: It effectively turns `api.user.get.useQuery(input)` into `api.user.get.useQuery(input, { trpc: { context: { __boundary: { file: "...", line: ... } } } })` behind the scenes.
+*   *(Legacy Note: For environments using Babel instead of SWC, a dedicated Babel plugin performs the same AST transformation, though it operates with a higher performance overhead in the Node.js runtime.)*
+
+### 2. Runtime: Link & Logging
+Once the metadata is injected into the tRPC context, it flows through the network boundary.
+
+*   **tRPC Link (`boundaryLink`)**: This link runs on the caller's side (Client or Server). It extracts the `__boundary` metadata from the context and attaches it to the outgoing request, typically via a URL query parameter (`__b`).
+*   **Server Logger (`boundaryLogger`)**: On the server-side tRPC handler, this logger parses the incoming request, identifies the caller's location and runtime environment, and prints a beautifully formatted log to the console.
 
 ## CLI (Static Analysis)
 
