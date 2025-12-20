@@ -125,3 +125,15 @@ trpc-boundary-inspector .
 ## Why?
 
 tRPC is powerful, but its abstraction can make it easy to lose track of where network communication is actually happening. This tool visualizes the "structure before the accident," supporting healthier architectural decisions.
+
+## ⚠️ Important Notes & Potential Risks
+
+**It is strongly recommended to use this tool ONLY in Development environments.**
+
+1.  **Security**: Internal file paths and line numbers are exposed in URLs. **Disable in production** to avoid leaking your server's directory structure.
+2.  **Caching**: Injected metadata creates unique URLs per call-site, which may bypass CDN or browser caches.
+3.  **Performance**: Logging every tRPC request to the console can impact server throughput under high load.
+4.  **URL Length**: Injected metadata increases URL length. Extremely long file paths might hit browser or proxy URL limits.
+5.  **Stability**: SWC plugins are an experimental feature in Next.js/Turbopack. Future updates to Next.js or SWC might require plugin rebuilds.
+
+---
