@@ -1,6 +1,6 @@
 {
   "name": "trpc-boundary-inspector",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Make tRPC network boundaries visible.",
   "type": "module",
   "main": "dist/packages/runtime/src/index.js",
@@ -37,8 +37,10 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:ts && npm run build:swc-plugin && npm run build:copy-wasm",
+    "build:ts": "tsc",
     "build:swc-plugin": "cd packages/swc-plugin && cargo build --release",
+    "build:copy-wasm": "cp packages/swc-plugin/target/wasm32-wasip1/release/trpc_boundary_inspector_swc_plugin.wasm dist/packages/next/src/",
     "dev": "node --loader ts-node/esm packages/cli/src/index.ts",
     "check": "oxlint && tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

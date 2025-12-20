@@ -7,10 +7,11 @@ export { default as loader } from './loader.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// SWC plugin のデフォルトパス（ビルド済み Wasm）
+// SWC plugin のデフォルトパス
+// パブリッシュ後は dist/packages/next/src/ と同じ階層に置かれることを想定
 const DEFAULT_SWC_PLUGIN_PATH = path.resolve(
   __dirname,
-  '../../swc-plugin/target/wasm32-wasip1/release/trpc_boundary_inspector_swc_plugin.wasm',
+  './trpc_boundary_inspector_swc_plugin.wasm',
 );
 
 interface BoundaryInspectorOptions {

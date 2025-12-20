@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name('trpc-boundary-inspector')
   .description('Make tRPC network boundaries visible.')
-  .version('0.0.1')
+  .version('0.1.0')
   .argument('[path]', 'path to scan', '.')
   .option('-o, --output <file>', 'output file (e.g., report.md)')
   .option('--all', 'show all hotspots instead of top 5')
