@@ -9,7 +9,7 @@ Visualize where your tRPC calls cross the network boundary.
 - **Network Boundary Mapping**: Identify whether tRPC calls are made from the Client, Server (RSC), or Edge Runtime.
 - **Automatic Call-Site Tracking**: File name and line number are automatically injected at build time.
 - **Next.js 15+ & Turbopack Ready**: Powered by a high-performance SWC (Wasm) plugin.
-- **Zero Code Changes**: Just wrap your Next.js config - no changes to your tRPC calls needed.
+- **Minimal Setup**: Just a one-time configuration of your tRPC link and server logger. No changes needed to individual tRPC calls.
 - **CI Friendly**: Generate Markdown reports to track boundary crossings in your Pull Requests.
 
 ## Installation
@@ -93,8 +93,6 @@ tRPC [node][server] [query] user.getAccount
   from ./app/providers/session.tsx:57
 ```
 
-![output](./example/docs/output_example.png)
-
 ## How It Works
 
 1. **Build Time (SWC/Babel)**: 
@@ -115,6 +113,8 @@ npm install -g trpc-boundary-inspector
 # Basic scan
 trpc-boundary-inspector .
 ```
+
+![output](./example/docs/output_example.png)
 
 ## Why?
 
