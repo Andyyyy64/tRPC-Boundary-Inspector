@@ -1,7 +1,7 @@
 import { transformSync } from '@babel/core';
 import { createRequire } from 'module';
 // @ts-ignore
-import trpcBoundaryInspectorBabelPlugin from '../../babel/src/index.js';
+import trpcBoundaryInspectorBabelPlugin from '../babel/index.js';
 
 // このパッケージ内の依存関係を解決
 const require = createRequire(import.meta.url);

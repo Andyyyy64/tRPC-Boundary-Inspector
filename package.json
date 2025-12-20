@@ -3,36 +3,36 @@
   "version": "0.1.0",
   "description": "Make tRPC network boundaries visible.",
   "type": "module",
-  "main": "dist/packages/runtime/src/index.js",
-  "module": "dist/packages/runtime/src/index.js",
-  "types": "dist/packages/runtime/src/index.d.ts",
+  "main": "dist/packages/runtime/index.js",
+  "module": "dist/packages/runtime/index.js",
+  "types": "dist/packages/runtime/index.d.ts",
   "bin": {
-    "trpc-boundary-inspector": "./dist/packages/cli/src/index.js"
+    "trpc-boundary-inspector": "./dist/packages/cli/index.js"
   },
   "exports": {
     ".": {
-      "types": "./dist/packages/runtime/src/index.d.ts",
-      "import": "./dist/packages/runtime/src/index.js",
-      "default": "./dist/packages/runtime/src/index.js"
+      "types": "./dist/packages/runtime/index.d.ts",
+      "import": "./dist/packages/runtime/index.js",
+      "default": "./dist/packages/runtime/index.js"
     },
     "./next": {
-      "types": "./dist/packages/next/src/index.d.ts",
-      "import": "./dist/packages/next/src/index.js",
-      "default": "./dist/packages/next/src/index.js"
+      "types": "./dist/packages/next/index.d.ts",
+      "import": "./dist/packages/next/index.js",
+      "default": "./dist/packages/next/index.js"
     },
     "./babel": {
-      "types": "./dist/packages/babel/src/index.d.ts",
-      "import": "./dist/packages/babel/src/index.js",
-      "default": "./dist/packages/babel/src/index.js"
+      "types": "./dist/packages/babel/index.d.ts",
+      "import": "./dist/packages/babel/index.js",
+      "default": "./dist/packages/babel/index.js"
     }
   },
   "typesVersions": {
     "*": {
       "next": [
-        "dist/packages/next/src/index.d.ts"
+        "dist/packages/next/index.d.ts"
       ],
       "babel": [
-        "dist/packages/babel/src/index.d.ts"
+        "dist/packages/babel/index.d.ts"
       ]
     }
   },
@@ -40,8 +40,8 @@
     "build": "npm run build:ts && npm run build:swc-plugin && npm run build:copy-wasm",
     "build:ts": "tsc",
     "build:swc-plugin": "cd packages/swc-plugin && cargo build --release",
-    "build:copy-wasm": "cp packages/swc-plugin/target/wasm32-wasip1/release/trpc_boundary_inspector_swc_plugin.wasm dist/packages/next/src/",
-    "dev": "node --loader ts-node/esm packages/cli/src/index.ts",
+    "build:copy-wasm": "cp packages/swc-plugin/target/wasm32-wasip1/release/trpc_boundary_inspector_swc_plugin.wasm dist/packages/next/",
+    "dev": "node --loader ts-node/esm packages/cli/index.ts",
     "check": "oxlint && tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "start": "node dist/runtime/src/index.js"

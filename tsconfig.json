@@ -19,10 +19,10 @@
     }
   },
   "include": [
-    "packages/cli/src/**/*.ts",
-    "packages/runtime/src/**/*.ts",
-    "packages/next/src/**/*.ts",
-    "packages/babel/src/**/*.ts"
+    "packages/cli/**/*.ts",
+    "packages/runtime/**/*.ts",
+    "packages/next/**/*.ts",
+    "packages/babel/**/*.ts"
   ],
   "exclude": ["example/**/*", "node_modules"]
 }
